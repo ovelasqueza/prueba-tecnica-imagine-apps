@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # BD PostgreSQL
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: task_user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: task_manager
+    ports:
+      - "5433:5433"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    command: -p 5433
+
+  # Backend Laravel
+  backend:
+    build:
+      context: ./backend  
+
+    command: >
+      sh -c "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000" 
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/var/www/html
+    depends_on:
+      - db
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5433
+      DB_DATABASE: task_manager
+      DB_USERNAME: task_user
+      DB_PASSWORD: password
+
+ #Frontend Angular
+  frontend-web:
+    build:
+      context: ./frontend-web
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend-web:/app
+    depends_on:
+      - backend
+    command: npm run start
+
+volumes:
+  pgdata:

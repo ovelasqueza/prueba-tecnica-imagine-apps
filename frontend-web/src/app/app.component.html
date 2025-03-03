@@ -1,0 +1,104 @@
+<div class="p-4 bg-gray-100 min-h-screen">
+  <header class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Gestión de Tareas</h1>
+    <div class="flex space-x-4">
+
+      <button (click)="openUserModal()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition duration-300">
+        Registrar Usuario
+      </button>
+
+      <div class="relative">
+        <button (click)="toggleUserList()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition duration-300">
+          Agregar Tarea
+        </button>
+
+        <div *ngIf="isUserListOpen" class="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+          <ul class="space-y-2 p-4">
+            <li *ngFor="let user of users" class="p-2 bg-gray-100 rounded-md cursor-pointer hover:bg-gray-200" (click)="openTaskModal(user)">
+              <h3 class="font-semibold text-gray-800">{{ user.name }}</h3>
+              <p class="text-sm text-gray-500">{{ user.email }}</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+  <div class="space-y-5">
+    <div class="flex space-x-4 mb-2">
+      <div>
+        <label class="block text-xs font-medium text-gray-700">Filtrar por Usuario:</label>
+        <select [(ngModel)]="selectedUserId" (change)="filterTasks()"
+          class="mt-1 block w-48 px-2 py-1 text-xs border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+          <option value="">Todos los Usuarios</option>
+          <option *ngFor="let user of users" [value]="user.id">{{ user.name }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700">Filtrar por Estado:</label>
+        <select [(ngModel)]="selectedStatus" (change)="filterTasks()"
+          class="mt-1 block w-48 px-2 py-1 text-xs border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+          <option value="">Todos los Estados</option>
+          <option value="pending">Pendiente</option>
+          <option value="completed">Completada</option>
+          <option value="overdue">Atrasada</option>
+        </select>
+      </div>
+    </div>
+    <div *ngIf="tasks.length === 0" class="text-gray-500 text-center">
+      No hay tareas disponibles.
+    </div>
+    <div *ngFor="let task of tasks" class="bg-white p-4 rounded-lg shadow-md w-2/4 mx-auto">
+      <div class="flex justify-between items-start">
+        <div class="w-3/4">
+          <h3 class="font-semibold text-gray-800 text-base">{{ task.title }}</h3>
+          <p class="text-gray-500 text-sm mt-1">{{ task.description }}</p>
+          <p class="text-gray-400 text-xs mt-1">Estado: {{ task.status }}</p>
+          <p class="text-indigo-600 text-sm mt-1">
+            Usuario: {{ task.user?.name || 'Sin asignar' }}
+          </p>
+          <div class="flex space-x-2 mt-3">
+            <button (click)="openEditModal(task)" class="bg-yellow-500 text-white text-xs px-3 py-1 rounded hover:bg-yellow-600 transition duration-300">
+              Actualizar
+            </button>
+            <button (click)="deleteTask(task.id)" class="bg-red-500 text-white text-xs px-3 py-1 rounded hover:bg-red-600 transition duration-300">
+              Eliminar
+            </button>
+          </div>
+        </div>
+        <div class="w-1/4 text-right text-gray-500 text-xs">
+          <p class="mt-1">Creacion: {{ formatDate(task.created_at) }}</p>
+          <p class="mt-1">Actualizacion: {{ formatDate(task.updated_at) }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="editingTask" class="mb-6 bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-lg font-bold text-gray-800 mb-4">Editar Tarea</h2>
+    <app-task-form
+      [task]="getEditingTask()"
+      (saveTaskEvent)="saveTask($event)">
+    </app-task-form>
+  </div>
+</div>
+
+<app-task-form
+  *ngIf="isEditModalOpen"
+  [task]="editingTask"
+  (close)="closeEditModal()"
+  (saveTaskEvent)="saveTask($event)">
+</app-task-form>
+
+<app-task-form
+  *ngIf="isTaskModalOpen"
+  (close)="closeTaskModal()"
+  (saveTaskEvent)="saveTask($event)">
+</app-task-form>
+
+<app-user-modal
+  *ngIf="isUserModalOpen"
+  (close)="closeUserModal()"
+  (submit)="saveUser($event)">
+</app-user-modal>

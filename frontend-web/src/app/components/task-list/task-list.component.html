@@ -1,0 +1,16 @@
+<ul class="space-y-4">
+  <li *ngFor="let task of tasks" class="bg-white p-4 rounded-lg shadow-md flex justify-between items-center">
+    <div>
+      <h3 class="font-semibold text-gray-800">{{ task.title }}</h3>
+      <p class="text-sm text-gray-500">{{ task.description }}</p>
+    </div>
+    <div class="space-x-2">
+      <button (click)="onEdit(task)" class="text-indigo-600 hover:underline text-sm">
+        Editar
+      </button>
+      <button (click)="onDelete(task.id)" class="text-red-600 hover:underline text-sm">
+        Eliminar
+      </button>
+    </div>
+  </li>
+</ul>
